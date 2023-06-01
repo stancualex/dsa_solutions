@@ -199,7 +199,7 @@ int main() {
     // printf("len: %d\n", s.len);
 
     Graph g;
-    FILE *f = fopen("test.txt", "r");
+    FILE *f = fopen("graph.txt", "r");
     if (f == NULL) {
         printf("Error opening file!\n");
         return 1;
