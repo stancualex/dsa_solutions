@@ -65,9 +65,11 @@ int get_key(LinkedList list, int key) {
 
 void insert_after(LinkedList *list, int after_key, int key) {
     int idx = get_key(*list, after_key);
-    if (idx == list->len) {
+
+    if (idx == -1) {
+        return;
+    } else if (idx == list->len - 1) {
         append(list, key);
-    } else if (idx == -1) {
         return;
     }
 
@@ -155,7 +157,7 @@ int main() {
     print(list);
     printf("len: %d\n", list.len);
 
-    for (int i = 0; i < 5; ++i)
+    for (int i = 5; i < 10; ++i)
         prepend(&list, i);
 
     print(list);
