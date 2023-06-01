@@ -3,7 +3,7 @@
 
 typedef struct node {
     int key;
-    struct node *prev;
+    struct node *next;
 } NodeT;
 
 typedef struct stack {
@@ -21,7 +21,7 @@ Stack init() {
 NodeT *create(int key) {
     NodeT *p = malloc(sizeof(NodeT));
     p->key = key;
-    p->prev = NULL;
+    p->next = NULL;
     return p;
 }
 
@@ -33,7 +33,7 @@ void push(Stack *s, int key) {
         return;
     }
 
-    p->prev = s->head;
+    p->next = s->head;
     s->head = p;
 }
 
@@ -44,7 +44,7 @@ int pop(Stack *s) {
     s->len--;
     NodeT *p = s->head;
     int key = p->key;
-    s->head = p->prev;
+    s->head = p->next;
     free(p);
 
     return key;
@@ -55,7 +55,7 @@ int peek(Stack s) {
 }
 
 void print_stack(Stack s) {
-    for (NodeT *p = s.head; p != NULL; p = p->prev)
+    for (NodeT *p = s.head; p != NULL; p = p->next)
         printf("%d ", p->key);
     printf("\n");
 }
@@ -63,7 +63,7 @@ void print_stack(Stack s) {
 void drop(Stack *s) {
     while (s->head != NULL) {
         NodeT *p = s->head;
-        s->head = s->head->prev;
+        s->head = s->head->next;
         free(p);
     }
 }

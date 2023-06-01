@@ -4,39 +4,39 @@
 
 typedef struct queue {
     int vec[CAPACITY];
-    int size;
+    int len;
     int head, tail;
 } Queue;
 
 void init(Queue *q) {
-    q->size = 0;
+    q->len = 0;
     q->head = 0;
     q->tail = 0;
 }
 
 void enqueue(Queue *q, int key) {
-    if (q->size == CAPACITY) {
+    if (q->len == CAPACITY) {
         printf("Queue is full!\n");
         return;
     }
     q->vec[q->tail] = key;
     q->tail = (q->tail + 1) % CAPACITY;
-    q->size++;
+    q->len++;
 }
 
 int deque(Queue *q) {
-    if (q->size == 0) {
+    if (q->len == 0) {
         printf("Queue is empty!\n");
         return -1;
     }
     int key = q->vec[q->head];
     q->head = (q->head + 1) % CAPACITY;
-    q->size--;
+    q->len--;
     return key;
 }
 
 void print_queue(Queue q) {
-    for (int i = 0; i < q.size; ++i)
+    for (int i = 0; i < q.len; ++i)
         printf("%d ", q.vec[(q.head + i) % CAPACITY]);
     printf("\n");
 }

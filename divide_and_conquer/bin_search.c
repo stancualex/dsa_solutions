@@ -1,21 +1,16 @@
 #include <stdio.h>
 
 int binary_search(int *arr, int lo, int hi, int number) {
-    // pas 2
     if (lo > hi)
         return -1;
 
-    // pas 3
     int mid = (lo + hi) / 2;
 
     if (arr[mid] == number) {
-        // pas 4
         return mid;
     } else if (arr[mid] < number) {
-        // pas 5
         return binary_search(arr, mid + 1, hi, number);
     } else {
-        // pas 6
         return binary_search(arr, lo, mid - 1, number);
     }
 }
@@ -27,4 +22,3 @@ int main() {
 
     return 0;
 }
-

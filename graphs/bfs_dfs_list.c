@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -5,40 +6,29 @@
 typedef struct node {
     int key;
     struct node *next;
-} NodeT;
+} *NodeT;
 
 typedef struct queue {
     int len;
-    NodeT *head;
-    NodeT *tail;
+    NodeT head;
+    NodeT tail;
 } Queue;
 
 typedef struct stack {
     int len;
-    NodeT *head;
+    NodeT head;
 } Stack;
 
 typedef struct graph {
     int n;
-    NodeT **lists;
+    int **m;
 } Graph;
 
-NodeT *create(int key) {
-    NodeT *p = malloc(sizeof(NodeT));
+NodeT create(int key) {
+    NodeT p = malloc(sizeof(struct node));
     p->key = key;
     p->next = NULL;
     return p;
-}
-
-void insert_first(NodeT **head, int key) {
-    NodeT *p = create(key);
-    if (*head == NULL) {
-        *head = p;
-        return;
-    }
-
-    p->next = *head;
-    *head = p;
 }
 
 Queue init_q() {
@@ -49,7 +39,7 @@ Queue init_q() {
 }
 
 void enqueue(Queue *q, int key) {
-    NodeT *p = create(key);
+    NodeT p = create(key);
     if (q->len == 0) {
         q->len++;
         q->head = q->tail = p;
@@ -68,7 +58,7 @@ int deque(Queue *q) {
     }
 
     q->len--;
-    NodeT *p = q->head;
+    NodeT p = q->head;
     int key = p->key;
     q->head = p->next;
     free(p);
@@ -76,20 +66,20 @@ int deque(Queue *q) {
 }
 
 void print_q(Queue q) {
-    for (NodeT *p = q.head; p != NULL; p = p->next)
+    for (NodeT p = q.head; p != NULL; p = p->next)
         printf("%d ", p->key);
     printf("\n");
 }
 
 Stack init_s() {
     Stack s;
-    s.head = NULL;
     s.len = 0;
+    s.head = NULL;
     return s;
 }
 
 void push(Stack *s, int key) {
-    NodeT *p = create(key);
+    NodeT p = create(key);
     if (s->len == 0) {
         s->len++;
         s->head = p;
@@ -108,7 +98,7 @@ int pop(Stack *s) {
     }
 
     s->len--;
-    NodeT *p = s->head;
+    NodeT p = s->head;
     int key = p->key;
     s->head = p->next;
     free(p);
@@ -116,22 +106,8 @@ int pop(Stack *s) {
 }
 
 void print_s(Stack s) {
-    for (NodeT *p = s.head; p != NULL; p = p->next)
+    for (NodeT p = s.head; p != NULL; p = p->next)
         printf("%d ", p->key);
-    printf("\n");
-}
-
-void print_list(NodeT *head) {
-    for (NodeT *p = head; p != NULL; p = p->next)
-        printf("%d ", p->key + 1);
-    printf("\n");
-}
-
-void print_graph_lists(Graph g) {
-    for (int i = 0; i < g.n; ++i) {
-        printf("%d: ", i + 1);
-        print_list(g.lists[i]);
-    }
     printf("\n");
 }
 
@@ -143,13 +119,13 @@ void bfs(Graph g, int start) {
 
     while (q.len > 0) {
         int u = deque(&q);
-        if (visited[u] == 0) {
-            printf("%d ", u + 1);
-            visited[u] = 1;
-            for (NodeT *p = g.lists[u]; p != NULL; p = p->next)
-                if (visited[p->key] == 0)
-                    enqueue(&q, p->key);
-        }
+        if (visited[u] == 1)
+            continue;
+        printf("%d ", u + 1);
+        visited[u] = 1;
+        for (int v = 0; v < g.n; ++v)
+            if (g.m[u][v] == 1 && visited[v] == 0)
+                enqueue(&q, v);
     }
     printf("\n");
 }
@@ -162,65 +138,49 @@ void dfs(Graph g, int start) {
 
     while (s.len > 0) {
         int u = pop(&s);
-        if (visited[u] == 0) {
-            printf("%d ", u + 1);
-            visited[u] = 1;
-            for (NodeT *p = g.lists[u]; p != NULL; p = p->next)
-                if (visited[p->key] == 0)
-                    push(&s, p->key);
-        }
+        if (visited[u] == 1)
+            continue;
+        printf("%d ", u + 1);
+        visited[u] = 1;
+        for (int v = 0; v < g.n; ++v)
+            if (g.m[u][v] == 1 && visited[v] == 0)
+                push(&s, v);
     }
     printf("\n");
 }
 
 int main() {
-    // Queue q = init_q();
-    // for (int i = 0; i < 5; ++i)
-    //     enqueue(&q, i);
-    // print_q(q);
-    // printf("len: %d\n", q.len);
-    //
-    // for (int i = 0; i < 6; ++i)
-    //     printf("%d ", deque(&q));
-    // printf("\n");
-    // print_q(q);
-    // printf("len: %d\n", q.len);
-
-    // Stack s = init_s();
-    // for (int i = 0; i < 5; ++i)
-    //     push(&s, i);
-    // print_s(s);
-    // printf("len: %d\n", s.len);
-    //
-    // for (int i = 0; i < 6; ++i)
-    //     printf("%d ", pop(&s));
-    // printf("\n");
-    // print_s(s);
-    // printf("len: %d\n", s.len);
-
     Graph g;
     FILE *f = fopen("graph.txt", "r");
     if (f == NULL) {
-        printf("Error opening file!\n");
-        return 1;
+        perror("Error opening file");
+        return errno;
     }
 
     fscanf(f, "%d", &g.n);
-    g.lists = calloc(g.n, sizeof(NodeT));
+    g.m = malloc(g.n * sizeof(int *));
+    for (int i = 0; i < g.n; ++i)
+        g.m[i] = calloc(g.n, sizeof(int));
 
     int u, v;
     while (fscanf(f, "%d %d", &u, &v) == 2) {
-        insert_first(&g.lists[u - 1], v - 1);
-        // insert_first(&g.lists[v - 1], u - 1); // neorientat
+        g.m[u - 1][v - 1] = 1;
+        // g.m[v - 1][u - 1] = 1;
     }
 
-    // print_graph_lists(g);
+    for (int i = 0; i < g.n; ++i) {
+        for (int j = 0; j < g.n; ++j)
+            printf("%d ", g.m[i][j]);
+        printf("\n");
+    }
+    printf("\n");
 
     bfs(g, 1);
     dfs(g, 1);
 
+    for (int i = 0; i < g.n; ++i)
+        free(g.m[i]);
+    free(g.m);
     fclose(f);
-    free(g.lists);
     return 0;
 }
-

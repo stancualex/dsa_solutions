@@ -3,16 +3,18 @@
 
 typedef struct node {
     int key;
-    struct node *next, *prev;
-} NodeT;
+    struct node *next;
+    struct node *prev;
+} *NodeT;
 
 typedef struct list {
     int len;
-    NodeT *head, *tail;
+    NodeT head;
+    NodeT tail;
 } LinkedList;
 
-NodeT *create(int key) {
-    NodeT *p = malloc(sizeof(NodeT));
+NodeT create(int key) {
+    NodeT p = malloc(sizeof(struct node));
     p->key = key;
     p->next = p->prev = NULL;
     return p;
@@ -26,7 +28,7 @@ LinkedList init() {
 }
 
 void prepend(LinkedList *list, int key) {
-    NodeT *p = create(key);
+    NodeT p = create(key);
     list->len++;
     if (list->head == NULL) {
         list->head = list->tail = p;
@@ -39,7 +41,7 @@ void prepend(LinkedList *list, int key) {
 }
 
 void append(LinkedList *list, int key) {
-    NodeT *p = create(key);
+    NodeT p = create(key);
     list->len++;
     if (list->head == NULL) {
         list->head = list->tail = p;
@@ -63,10 +65,10 @@ void insert_at(LinkedList *list, int idx, int key) {
     }
 
     list->len++;
-    NodeT *curr = list->head;
+    NodeT curr = list->head;
     for (int i = 0; i < idx; ++i)
         curr = curr->next;
-    NodeT *p = create(key);
+    NodeT p = create(key);
     p->next = curr;
     p->prev = curr->prev;
     curr->prev->next = p;
@@ -78,7 +80,7 @@ int del_first(LinkedList *list) {
         return -1;
 
     list->len--;
-    NodeT *p = list->head;
+    NodeT p = list->head;
     int key = p->key;
     if (list->len == 0) {
         list->head = list->tail = NULL;
@@ -96,7 +98,7 @@ int del_last(LinkedList *list) {
         return -1;
 
     list->len--;
-    NodeT *p = list->tail;
+    NodeT p = list->tail;
     int key = p->key;
     if (list->len == 0) {
         list->head = list->tail = NULL;
@@ -110,7 +112,7 @@ int del_last(LinkedList *list) {
 }
 
 int del_key(LinkedList *list, int key) {
-    NodeT *curr = list->head;
+    NodeT curr = list->head;
     int idx = 0;
     for (; idx < list->len; ++idx, curr = curr->next)
         if (curr->key == key)
@@ -144,7 +146,7 @@ int del_at(LinkedList *list, int idx) {
     }
 
     list->len--;
-    NodeT *curr = list->head;
+    NodeT curr = list->head;
     for (int i = 0; i < idx; ++i)
         curr = curr->next;
 
@@ -157,7 +159,7 @@ int del_at(LinkedList *list, int idx) {
 }
 
 int get_key(LinkedList list, int key) {
-    NodeT *curr = list.head;
+    NodeT curr = list.head;
     int idx = 0;
     for (; idx < list.len; ++idx, curr = curr->next)
         if (curr->key == key)
@@ -173,7 +175,7 @@ int get_at(LinkedList list, int idx) {
     if (idx >= list.len || idx < 0)
         return -1;
 
-    NodeT *curr = list.head;
+    NodeT curr = list.head;
     for (int i = 0; i < idx; ++i)
         curr = curr->next;
 
@@ -182,7 +184,7 @@ int get_at(LinkedList list, int idx) {
 
 void drop(LinkedList *list) {
     while (list->head != NULL) {
-        NodeT *p = list->head;
+        NodeT p = list->head;
         list->head = list->head->next;
         free(p);
     }
@@ -190,13 +192,13 @@ void drop(LinkedList *list) {
 }
 
 void print_list(LinkedList list) {
-    for (NodeT *p = list.head; p != NULL; p = p->next)
+    for (NodeT p = list.head; p != NULL; p = p->next)
         printf("%d ", p->key);
     printf("\n");
 }
 
 void print_list_rev(LinkedList list) {
-    for (NodeT *p = list.tail; p != NULL; p = p->prev)
+    for (NodeT p = list.tail; p != NULL; p = p->prev)
         printf("%d ", p->key);
     printf("\n");
 }

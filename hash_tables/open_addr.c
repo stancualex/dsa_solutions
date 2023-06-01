@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define M 7
 #define C1 1
@@ -8,9 +9,7 @@
 typedef struct cell {
     int key;
     int status;
-} CellT;
-
-enum { FREE, OCCUPIED };
+} Cell;
 
 int h_prime(int key) {
     key %= M;
@@ -38,103 +37,74 @@ int double_hashing(int key, int idx) {
     return (h_prime(key) + idx * h_double_prime(key)) % M;
 }
 
-void insert_key(CellT *cTable, int key, int (*hash)(int, int)) {
+void insert_key(Cell *hash_table, int key, int (*hash)(int, int)) {
     int idx = 0;
     int h = hash(key, idx);
 
-    while (cTable[h].status == OCCUPIED) {
+    while (hash_table[h].status == 1) {
         idx++;
         if (idx >= M)
             return;
         h = hash(key, idx);
     }
-    cTable[h].key = key;
-    cTable[h].status = OCCUPIED;
+    hash_table[h].key = key;
+    hash_table[h].status = 1;
 }
 
-int find_key(CellT *cTable, int key, int (*hash)(int, int)) {
+int find_key(Cell *hash_table, int key, int (*hash)(int, int)) {
     int idx = 0;
     int h = hash(key, idx);
 
     for (idx = 0; idx < M; ++idx) {
-        if (cTable[h].key == key && cTable[h].status == OCCUPIED)
+        if (hash_table[h].key == key && hash_table[h].status == 1)
             return h;
         h = hash(key, idx);
     }
     return -1;
 }
 
-void test_find(CellT *cTable, int *test_vals, int *expected_vals, int (*hash)(int, int)) {
-    printf("testing ");
-    for (int i = 0; i < 3; ++i)
-        printf("%d ", test_vals[i]);
-    printf("against ");
-    for (int i = 0; i < 3; ++i)
-        printf("%d ", expected_vals[i]);
-    printf("\n");
-    for (int i = 0; i < 3; ++i) {
-        int h = find_key(cTable, test_vals[i], hash);
-        char *passed = (h == expected_vals[i]) ? "passed" : "failed";
-        printf("%d %d %s\n", test_vals[i], h, passed);
-    }
-    printf("\n");
-}
-
-void delete_key(CellT *cTable, int key, int (*hash)(int, int)) {
-    int h = find_key(cTable, key, hash);
+void delete_key(Cell *hash_table, int key, int (*hash)(int, int)) {
+    int h = find_key(hash_table, key, hash);
     if (h != -1)
-        cTable[h].status = FREE;
+        hash_table[h].status = 0;
 }
 
-void set_table_free(CellT *cTable) {
-    for (int i = 0; i < M; ++i)
-        cTable[i].status = FREE;
-}
-
-void print_table(CellT *cTable) {
+void print_table(Cell *hash_table) {
     for (int i = 0; i < M; ++i) {
         printf("%d: ", i);
-        if (cTable[i].status == OCCUPIED)
-            printf("%d", cTable[i].key);
+        if (hash_table[i].status == 1)
+            printf("%d", hash_table[i].key);
         printf("\n");
     }
     printf("\n");
 }
 
 int main() {
-    CellT *cTable = malloc(M * sizeof(CellT));
-    set_table_free(cTable);
+    Cell hash_table[M];
+    memset(hash_table, 0, sizeof(hash_table));
 
-    int vals[M] = {19, 36, 5, 21, 4, 26, 14};
-    int testVals[] = {100, 5, 21};
+    int vals[] = {19, 36, 5, 21, 4, 26, 14, 100};
+    int len = sizeof(vals) / sizeof(vals[0]);
 
     printf("Linear probing:\n");
-    for (int i = 0; i < M; ++i)
-        insert_key(cTable, vals[i], linear_probing);
-    insert_key(cTable, 100, linear_probing);
-    test_find(cTable, testVals, (int[]){-1, 6, 0}, linear_probing);
-    delete_key(cTable, 4, linear_probing);
-    print_table(cTable);
-    set_table_free(cTable);
+    for (int i = 0; i < len; ++i)
+        insert_key(hash_table, vals[i], linear_probing);
+    delete_key(hash_table, 4, linear_probing);
+    print_table(hash_table);
+    memset(hash_table, 0, sizeof(hash_table));
 
     printf("Quadratic probing:\n");
-    for (int i = 0; i < M; ++i)
-        insert_key(cTable, vals[i], quadratic_probing);
-    insert_key(cTable, 100, quadratic_probing);
-    test_find(cTable, testVals, (int[]){-1, 0, 2}, quadratic_probing);
-    delete_key(cTable, 4, quadratic_probing);
-    print_table(cTable);
-    set_table_free(cTable);
+    for (int i = 0; i < len; ++i)
+        insert_key(hash_table, vals[i], quadratic_probing);
+    delete_key(hash_table, 4, quadratic_probing);
+    print_table(hash_table);
+    memset(hash_table, 0, sizeof(hash_table));
 
     printf("Double hashing:\n");
-    for (int i = 0; i < M; ++i)
-        insert_key(cTable, vals[i], double_hashing);
-    insert_key(cTable, 100, double_hashing);
-    test_find(cTable, testVals, (int[]){-1, 3, 0}, double_hashing);
-    delete_key(cTable, 4, double_hashing);
-    print_table(cTable);
-    set_table_free(cTable);
+    for (int i = 0; i < len; ++i)
+        insert_key(hash_table, vals[i], double_hashing);
+    delete_key(hash_table, 4, double_hashing);
+    print_table(hash_table);
 
-    free(cTable);
     return 0;
 }

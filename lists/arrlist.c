@@ -1,60 +1,55 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct {
+typedef struct list {
     int cap;
-    int size;
-    float *arr;
+    int len;
+    int *arr;
 } ArrList;
 
-void init(ArrList *list) {
-    list->cap = 6;
-    list->size = 0;
-    list->arr = malloc(list->cap * sizeof(float));
+ArrList init() {
+    ArrList list;
+    list.cap = 10;
+    list.len = 0;
+    list.arr = malloc(list.cap * sizeof(int));
+    return list;
 }
 
-void insert_last(ArrList *list, float val) {
-    if (list->size == list->cap) {
-        (list->cap) *= 2;
-        list->arr = realloc(list->arr, list->cap * sizeof(float));
+void push(ArrList *list, int key) {
+    if (list->len == list->cap) {
+        list->cap *= 2;
+        list->arr = realloc(list->arr, list->cap * sizeof(int));
     }
 
-    list->arr[list->size] = val;
-    (list->size)++;
+    list->arr[list->len++] = key;
 }
 
-void insert_first(ArrList *list, float val) {
-    if (list->size == list->cap) {
-        (list->cap) *= 2;
-        list->arr = realloc(list->arr, list->cap * sizeof(float));
-    }
+int pop(ArrList *list) {
+    if (list->len == 0)
+        return -1;
 
-    for (int i = list->size; i >= 0; --i)
-        list->arr[i] = list->arr[i - 1];
-    list->arr[0] = val;
-    (list->size)++;
+    return list->arr[--list->len];
 }
 
-void print_arrlist(ArrList *list) {
-    for (int i = 0; i < list->size; ++i)
-        printf("%.2f ", list->arr[i]);
-    printf("\n");
-}
-
-void print_steps(ArrList *list, void (*func)(ArrList *, float)) {
-    for (int i = 1; i <= 10; ++i) {
-        func(list, (float) i);
-        print_arrlist(list);
-    }
+void print(ArrList list) {
+    for (int i = 0; i < list.len; ++i)
+        printf("%d ", list.arr[i]);
     printf("\n");
 }
 
 int main() {
-    ArrList arr;
-    init(&arr);
-    print_steps(&arr, insert_first);
-    init(&arr);
-    print_steps(&arr, insert_last);
+    ArrList list = init();
+    for (int i = 0; i < 20; ++i)
+        push(&list, i);
 
+    print(list);
+    printf("len: %d\n", list.len);
+
+    for (int i = 0; i < 21; ++i)
+        printf("%d ", pop(&list));
+    printf("\n");
+    printf("len: %d\n", list.len);
+
+    free(list.arr);
     return 0;
 }

@@ -3,22 +3,23 @@
 
 typedef struct node {
     int key;
-    struct node *left, *right;
-} NodeT;
+    struct node *left;
+    struct node *right;
+} *NodeT;
 
-NodeT *create(int key) {
-    NodeT *p = malloc(sizeof(NodeT));
+NodeT create(int key) {
+    NodeT p = malloc(sizeof(struct node));
     p->key = key;
     p->left = p->right = NULL;
     return p;
 }
 
-void insert(NodeT **root, int key) {
+void insert(NodeT *root, int key) {
     if (*root == NULL) {
         *root = create(key);
         return;
     }
-    NodeT *p = *root;
+    NodeT p = *root;
     while (p != NULL) {
         if (p->key == key)
             return;
@@ -38,31 +39,34 @@ void insert(NodeT **root, int key) {
     }
 }
 
-void preorder(NodeT *root) {
-    if (root != NULL) {
-        printf("%d ", root->key);
-        preorder(root->left);
-        preorder(root->right);
-    }
+void preorder(NodeT root) {
+    if (root == NULL)
+        return;
+
+    printf("%d ", root->key);
+    preorder(root->left);
+    preorder(root->right);
 }
 
-void inorder(NodeT *root) {
-    if (root != NULL) {
-        inorder(root->left);
-        printf("%d ", root->key);
-        inorder(root->right);
-    }
+void inorder(NodeT root) {
+    if (root == NULL)
+        return;
+
+    inorder(root->left);
+    printf("%d ", root->key);
+    inorder(root->right);
 }
 
-void postorder(NodeT *root) {
-    if (root != NULL) {
-        postorder(root->left);
-        postorder(root->right);
-        printf("%d ", root->key);
-    }
+void postorder(NodeT root) {
+    if (root == NULL)
+        return;
+
+    postorder(root->left);
+    postorder(root->right);
+    printf("%d ", root->key);
 }
 
-NodeT *search(NodeT *root, int key) {
+NodeT search(NodeT root, int key) {
     while (root != NULL) {
         if (root->key == key)
             return root;
@@ -75,7 +79,7 @@ NodeT *search(NodeT *root, int key) {
     return NULL;
 }
 
-NodeT *find_min(NodeT *root) {
+NodeT find_min(NodeT root) {
     if (root == NULL)
         return NULL;
     while (root->left != NULL)
@@ -83,7 +87,7 @@ NodeT *find_min(NodeT *root) {
     return root;
 }
 
-NodeT *find_max(NodeT *root) {
+NodeT find_max(NodeT root) {
     if (root == NULL)
         return NULL;
     while (root->right != NULL)
@@ -91,14 +95,14 @@ NodeT *find_max(NodeT *root) {
     return root;
 }
 
-NodeT *successor(NodeT *root, int key) {
-    NodeT *p = search(root, key);
+NodeT successor(NodeT root, int key) {
+    NodeT p = search(root, key);
     if (p == NULL)
         return NULL;
     if (p->right != NULL)
         return find_min(p->right);
-    NodeT *q = root;
-    NodeT *succ = NULL;
+    NodeT q = root;
+    NodeT succ = NULL;
     while (q != NULL) {
         if (key < q->key) {
             succ = q;
@@ -112,14 +116,14 @@ NodeT *successor(NodeT *root, int key) {
     return succ;
 }
 
-NodeT *predecessor(NodeT *root, int key) {
-    NodeT *p = search(root, key);
+NodeT predecessor(NodeT root, int key) {
+    NodeT p = search(root, key);
     if (p == NULL)
         return NULL;
     if (p->right != NULL)
         return find_max(p->right);
-    NodeT *q = root;
-    NodeT *pred = NULL;
+    NodeT q = root;
+    NodeT pred = NULL;
     while (q != NULL) {
         if (key < q->key) {
             q = q->left;
@@ -134,7 +138,7 @@ NodeT *predecessor(NodeT *root, int key) {
 }
 
 int main() {
-    NodeT *root = NULL;
+    NodeT root = NULL;
     int vals[] = {100, 200, 216, 150, 155, 160, 157};
     for (int i = 0; i < 7; ++i)
         insert(&root, vals[i]);

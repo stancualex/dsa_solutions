@@ -4,46 +4,46 @@
 typedef struct node {
     int key;
     struct node *next;
-} NodeT;
+} *NodeT;
 
 typedef struct queue {
-    int size;
-    NodeT *head;
-    NodeT *tail;
+    int len;
+    NodeT head;
+    NodeT tail;
 } Queue;
 
 void init(Queue *q) {
     q->head = q->tail = NULL;
-    q->size = 0;
+    q->len = 0;
 }
 
-NodeT *create(int key) {
-    NodeT *p = malloc(sizeof(NodeT));
+NodeT create(int key) {
+    NodeT p = malloc(sizeof(struct node));
     p->key = key;
     p->next = NULL;
     return p;
 }
 
 void enqueue(Queue *q, int key) {
-    NodeT *p = create(key);
-    if (q->size == 0) {
+    NodeT p = create(key);
+    if (q->len == 0) {
         q->head = q->tail = p;
-        q->size++;
+        q->len++;
         return;
     }
-    q->size++;
+    q->len++;
     q->tail->next = p;
     q->tail = p;
 }
 
 int deque(Queue *q) {
-    if (q->size == 0) {
+    if (q->len == 0) {
         q->tail = NULL;
         return -1;
     }
 
-    q->size--;
-    NodeT *p = q->head;
+    q->len--;
+    NodeT p = q->head;
     int key = p->key;
     q->head = p->next;
     free(p);
@@ -56,7 +56,7 @@ int peek(Queue q) {
 }
 
 void print_queue(Queue q) {
-    for (NodeT *p = q.head; p != NULL; p = p->next)
+    for (NodeT p = q.head; p != NULL; p = p->next)
         printf("%d ", p->key);
     printf("\n");
 }

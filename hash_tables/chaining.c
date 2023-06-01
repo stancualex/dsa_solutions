@@ -1,116 +1,87 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define M 7
 
 typedef struct node {
     int key;
     struct node *next;
-} NodeT;
+} *NodeT;
 
-int h_func(int key) {
+int hash_func(int key) {
     key %= M;
     if (key < 0)
         key += M;
     return key;
 }
 
-void insert_elem(NodeT *hTable[M], int key) {
-    int h = h_func(key);
-    NodeT *p = malloc(sizeof(NodeT));
+void insert_key(NodeT hash_table[M], int key) {
+    int h = hash_func(key);
+    NodeT p = malloc(sizeof(struct node));
     p->key = key;
-    p->next = hTable[h];
-    hTable[h] = p;
+    p->next = hash_table[h];
+    hash_table[h] = p;
 }
 
-NodeT *find_elem(NodeT *hTable[M], int key) {
-    int h = h_func(key);
-    NodeT *p = hTable[h];
-    while (p != NULL) {
+NodeT find_key(NodeT hash_table[M], int key) {
+    int h = hash_func(key);
+    for (NodeT p = hash_table[h]; p != NULL; p = p->next)
         if (p->key == key)
             return p;
-        p = p->next;
-    }
     return NULL;
 }
 
-void print_node_key(NodeT *node) {
-    if (node != NULL) {
-        printf("%d ", node->key);
+void delete_key(NodeT hash_table[M], int key) {
+    NodeT p = find_key(hash_table, key);
+    if (p == NULL)
+        return;
+
+    int h = hash_func(key);
+    NodeT q = hash_table[h];
+    if (q == p) {
+        hash_table[h] = p->next;
     } else {
-        printf("# ");
+        while (q->next != p)
+            q = q->next;
+        q->next = p->next;
     }
+    free(p);
 }
 
-void test_find(NodeT *hTable[M], int *test_vals, NodeT *expected_vals[]) {
-    printf("Testing ");
-    for (int i = 0; i < 4; ++i)
-        printf("%d ", test_vals[i]);
-    printf("against ");
-    for (int i = 0; i < 4; ++i)
-        print_node_key(expected_vals[i]);
-    printf("\n");
-    for (int i = 0; i < 4; ++i) {
-        NodeT *p = find_elem(hTable, test_vals[i]);
-        char *passed = (p == expected_vals[i]) ? "passed" : "failed";
-        printf("%d ", test_vals[i]);
-        print_node_key(p);
-        printf("%s\n", passed);
-    }
+void print_list(NodeT head) {
+    for (NodeT p = head; p != NULL; p = p->next)
+        printf("%d ", p->key);
     printf("\n");
 }
 
-void delete_elem(NodeT *hTable[M], int key) {
-    NodeT *p = find_elem(hTable, key);
-    if (p != NULL) {
-        int h = h_func(key);
-        NodeT *q = hTable[h];
-        if (q == p) {
-            hTable[h] = p->next;
-        } else {
-            while (q->next != p)
-                q = q->next;
-            q->next = p->next;
-        }
-        free(p);
-    }
-}
-
-void print_all(NodeT *hTable[M]) {
+void print_all(NodeT hash_table[M]) {
     for (int i = 0; i < M; ++i) {
-        NodeT *p = hTable[i];
         printf("%d: ", i);
-        while (p != NULL) {
-            printf("%d ", p->key);
-            p = p->next;
-        }
-        printf("\n");
+        print_list(hash_table[i]);
     }
     printf("\n");
 }
 
 int main() {
-    NodeT *hTable[M];
-    for (int i = 0; i < M; ++i)
-        hTable[i] = NULL;
+    NodeT hash_table[M];
+    memset(hash_table, 0, sizeof(hash_table));
 
-    int insert_vals[] = {36, 14, 26, 21, 5, 19, 4, -2, -6};
-    for (int i = 0; i < 9; ++i)
-        insert_elem(hTable, insert_vals[i]);
+    int ins_vals[] = {36, 14, 26, 21, 5, 19, 4, -2, -6};
+    int len_ins = sizeof(ins_vals) / sizeof(ins_vals[0]);
+    for (int i = 0; i < len_ins; ++i)
+        insert_key(hash_table, ins_vals[i]);
 
     printf("Pre deletion:\n");
-    print_all(hTable);
-
-    int test_vals[] = {36, 5, -2, 100};
-    NodeT *expected_vals[] = {hTable[1]->next, hTable[5]->next->next, hTable[5], NULL};
-    test_find(hTable, test_vals, expected_vals);
+    print_all(hash_table);
 
     int del_vals[] = {19, 5, 21, 14, 100};
-    for (int i = 0; i < 5; ++i)
-        delete_elem(hTable, del_vals[i]);
+    int len_del = sizeof(del_vals) / sizeof(del_vals[0]);
+    for (int i = 0; i < len_del; ++i)
+        delete_key(hash_table, del_vals[i]);
 
     printf("Post deletion:\n");
-    print_all(hTable);
+    print_all(hash_table);
 
     return 0;
 }
