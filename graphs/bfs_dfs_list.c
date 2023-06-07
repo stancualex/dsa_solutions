@@ -21,7 +21,7 @@ typedef struct stack {
 
 typedef struct graph {
     int n;
-    int **m;
+    NodeT *lists;
 } Graph;
 
 NodeT create(int key) {
@@ -29,6 +29,17 @@ NodeT create(int key) {
     p->key = key;
     p->next = NULL;
     return p;
+}
+
+void insert_first(NodeT *head, int key) {
+    NodeT p = create(key);
+    if (*head == NULL) {
+        *head = p;
+        return;
+    }
+
+    p->next = *head;
+    *head = p;
 }
 
 Queue init_q() {
@@ -73,8 +84,8 @@ void print_q(Queue q) {
 
 Stack init_s() {
     Stack s;
-    s.len = 0;
     s.head = NULL;
+    s.len = 0;
     return s;
 }
 
@@ -111,6 +122,20 @@ void print_s(Stack s) {
     printf("\n");
 }
 
+void print_list(NodeT head) {
+    for (NodeT p = head; p != NULL; p = p->next)
+        printf("%d ", p->key + 1);
+    printf("\n");
+}
+
+void print_graph_lists(Graph g) {
+    for (int i = 0; i < g.n; ++i) {
+        printf("%d: ", i + 1);
+        print_list(g.lists[i]);
+    }
+    printf("\n");
+}
+
 void bfs(Graph g, int start) {
     int visited[g.n];
     memset(visited, 0, sizeof(visited));
@@ -123,9 +148,9 @@ void bfs(Graph g, int start) {
             continue;
         printf("%d ", u + 1);
         visited[u] = 1;
-        for (int v = 0; v < g.n; ++v)
-            if (g.m[u][v] == 1 && visited[v] == 0)
-                enqueue(&q, v);
+        for (NodeT p = g.lists[u]; p != NULL; p = p->next)
+            if (visited[p->key] == 0)
+                enqueue(&q, p->key);
     }
     printf("\n");
 }
@@ -142,9 +167,9 @@ void dfs(Graph g, int start) {
             continue;
         printf("%d ", u + 1);
         visited[u] = 1;
-        for (int v = 0; v < g.n; ++v)
-            if (g.m[u][v] == 1 && visited[v] == 0)
-                push(&s, v);
+        for (NodeT p = g.lists[u]; p != NULL; p = p->next)
+            if (visited[p->key] == 0)
+                push(&s, p->key);
     }
     printf("\n");
 }
@@ -158,29 +183,20 @@ int main() {
     }
 
     fscanf(f, "%d", &g.n);
-    g.m = malloc(g.n * sizeof(int *));
-    for (int i = 0; i < g.n; ++i)
-        g.m[i] = calloc(g.n, sizeof(int));
+    g.lists = calloc(g.n, sizeof(struct node));
 
     int u, v;
     while (fscanf(f, "%d %d", &u, &v) == 2) {
-        g.m[u - 1][v - 1] = 1;
-        // g.m[v - 1][u - 1] = 1;
+        insert_first(&g.lists[u - 1], v - 1);
+        // insert_first(&g.lists[v - 1], u - 1);
     }
 
-    for (int i = 0; i < g.n; ++i) {
-        for (int j = 0; j < g.n; ++j)
-            printf("%d ", g.m[i][j]);
-        printf("\n");
-    }
-    printf("\n");
+    print_graph_lists(g);
 
     bfs(g, 1);
     dfs(g, 1);
 
-    for (int i = 0; i < g.n; ++i)
-        free(g.m[i]);
-    free(g.m);
     fclose(f);
+    free(g.lists);
     return 0;
 }
