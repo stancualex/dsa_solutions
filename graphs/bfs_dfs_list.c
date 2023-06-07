@@ -183,7 +183,7 @@ int main() {
     }
 
     fscanf(f, "%d", &g.n);
-    g.lists = calloc(g.n, sizeof(struct node));
+    g.lists = calloc(g.n, sizeof(NodeT));
 
     int u, v;
     while (fscanf(f, "%d %d", &u, &v) == 2) {
