@@ -1,0 +1,16 @@
+---
+BasedOnStyle: LLVM
+IndentWidth: 4
+UseTab: Never
+AlignArrayOfStructures: Left
+PointerAlignment: Right
+ReferenceAlignment: Pointer
+AllowShortBlocksOnASingleLine: Empty
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AllowShortEnumsOnASingleLine: true
+BreakBeforeTernaryOperators: true
+SpaceAfterCStyleCast: true
+IndentCaseLabels: false

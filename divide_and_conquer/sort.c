@@ -73,7 +73,8 @@ int *mergesort2(int *arr, int len) {
     return merge2(left, len_left, right, len_right);
 }
 
-int *merge3(int *left, int len_left, int *mid, int len_mid, int *right, int len_right) {
+int *merge3(int *left, int len_left, int *mid, int len_mid, int *right,
+            int len_right) {
     int *arr = malloc((len_left + len_mid + len_right) * sizeof(int));
     int idx_left = 0, idx_mid = 0, idx_right = 0, idx_arr = 0;
 
